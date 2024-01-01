@@ -82,4 +82,4 @@ To run the server, client, or sendData script in development mode with real-time
 
 ## Author
 
--   **Satyam Anand**
+-   [**Satyam Anand**](https://github.com/SatyamAnand98)
