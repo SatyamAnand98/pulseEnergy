@@ -7,7 +7,7 @@
     "start-server": "node build/src/server/WebSocketServer.js",
     "start-client": "node build/src/client/client.js",
     "start-sendData": "node build/src/client/sendExcelData.js",
-    "dev-server": "ts-node-dev --respawn --pretty --transpile-only src/server/WebSocketServer.ts",
+    "dev-server": "ts-node-dev --respawn --pretty --transpile-only src/server/webSocket.ts",
     "dev-client": "ts-node-dev --respawn --pretty --transpile-only src/client/client.ts",
     "dev-sendData": "ts-node-dev --respawn --pretty --transpile-only src/client/sendExcelData.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,12 +17,15 @@
   "keywords": [],
   "description": "",
   "dependencies": {
+    "artillery": "^2.0.3",
     "body-parser": "^1.20.2",
     "csv-parse": "^5.5.3",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "joi": "^17.11.0",
     "mongoose": "^8.0.3",
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2",
     "typescript": "^5.3.3",
     "ws": "^8.16.0",
     "xlsx": "^0.18.5"

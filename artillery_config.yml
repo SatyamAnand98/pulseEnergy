@@ -1,0 +1,22 @@
+config:
+    target: "http://localhost:3000"
+    # phases:
+    #     - duration: 3600
+    #       arrivalRate: 1
+    #       rampTo: 51000
+    #       name: "Ramping up the load"
+    socketio:
+        transports: ["websocket"]
+    engines:
+        socketio: {}
+    processor: "./payloadProcessor.js"
+
+scenarios:
+    - name: "SocketIO"
+      engine: "socketio"
+      flow:
+          # - loop:
+          - emit:
+                data: "HELLO WORLD"
+          - think: 5
+          # count: 720

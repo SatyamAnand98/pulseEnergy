@@ -1,46 +1,47 @@
-import WebSocket from "ws";
+import { io } from "socket.io-client";
 
-const serverUrl = "ws://localhost:8080";
-const wsClients: Map<number, WebSocket> = new Map();
+const serverUrl = "http://localhost:3000";
+const socketClients: Map<number, ReturnType<typeof io>> = new Map();
 
 export const sendToServer = (clientId: number, message: string) => {
-    if (!wsClients.has(clientId)) {
-        const wsClient = new WebSocket(serverUrl);
+    if (!socketClients.has(clientId)) {
+        const socketClient = io(serverUrl);
 
-        wsClient.on("open", () => {
+        socketClient.on("connect", () => {
             console.log(`🟢 Client ${clientId} connected to server`);
-            wsClient.send(message);
+            socketClient.emit("message", message);
         });
 
-        wsClient.on("message", (message: string) => {
-            const parsedMessage = JSON.parse(message);
-            console.log(
-                "✅ Received message from server with clientId: ",
-                clientId,
-                "\n",
-                "🔌 Charge point ID: ",
-                parsedMessage.charge_point_id,
-                "\n📦 Raw message:\n",
-                JSON.stringify(JSON.parse(parsedMessage.payload), null, 4)
-            );
+        socketClient.on("message", (message: string) => {
+            try {
+                const parsedMessage = JSON.parse(message);
+                console.log(
+                    "✅ Received message from server with clientId: ",
+                    clientId,
+                    "\n📦 Raw message:\n",
+                    parsedMessage
+                );
+            } catch (error) {
+                console.error("Error parsing message:", error);
+            }
         });
 
-        wsClient.on("close", () => {
+        socketClient.on("disconnect", () => {
             console.log(`🔴 Client ${clientId} disconnected from server`);
         });
 
-        wsClient.on("error", (err) => {
-            console.error(`WebSocket error for client ${clientId}:`, err);
+        socketClient.on("connect_error", (err) => {
+            console.error(`Connection error for client ${clientId}:`, err);
         });
 
-        wsClients.set(clientId, wsClient);
+        socketClients.set(clientId, socketClient);
     } else {
-        const wsClient = wsClients.get(clientId);
-        if (wsClient && wsClient.readyState === WebSocket.OPEN) {
-            wsClient.send(message);
+        const socketClient = socketClients.get(clientId);
+        if (socketClient && socketClient.connected) {
+            socketClient.emit("message", message);
         } else {
             console.log(
-                `❌ WebSocket for client ${clientId} is not open. Message not sent.`
+                `❌ Socket for client ${clientId} is not connected. Message not sent.`
             );
         }
     }

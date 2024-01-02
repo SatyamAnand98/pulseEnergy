@@ -2,7 +2,7 @@ import http from "http";
 import WebSocket from "ws";
 import cluster from "cluster";
 import os from "os";
-import { saveData } from "../helpers/saveToDb";
+// import { saveData } from '../helpers/saveToDb';
 
 const totalCPUs = os.cpus().length;
 
@@ -25,19 +25,29 @@ if (cluster.isPrimary) {
     const wss = new WebSocket.Server({ server });
 
     wss.on("connection", (ws) => {
-        console.log("🟢  New connection");
+        console.log("🟢 New connection");
 
-        ws.on("message", (message: string) => {
-            const parsedMessage = JSON.parse(message);
-            console.log(
-                "✅ Received message: \n",
-                "🔌 Charge point ID: ",
-                parsedMessage.charge_point_id,
-                "\n📦 Raw message:\n",
-                JSON.stringify(JSON.parse(parsedMessage.payload), null, 4)
-            );
-            saveData(parsedMessage);
-            ws.send(message);
+        ws.on("message", (message: Buffer) => {
+            console.log("Received message type:", typeof message);
+            console.log("Received message length:", message.length);
+            const messageString = message.toString();
+            console.log("Received message: ", messageString);
+
+            if (!messageString) {
+                console.log("⚠️ Received an empty message");
+                return;
+            }
+
+            try {
+                const parsedMessage = JSON.parse(messageString);
+                console.log("✅ Parsed message: ", parsedMessage);
+
+                // saveData(parsedMessage);
+
+                ws.send(messageString);
+            } catch (error) {
+                console.error("⚠️ Error parsing message: ", error);
+            }
         });
 
         ws.on("close", () => {
