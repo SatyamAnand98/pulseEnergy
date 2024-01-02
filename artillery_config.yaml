@@ -3,7 +3,8 @@ config:
     phases:
         - duration: 3600
           arrivalRate: 14
-          name: "Load Test for 1 hour with over 50000 clients creating 14 clients per second"
+          rampTo: 50
+          name: "Load Test for 1 hour targeting around 50,000 clients"
     engines:
         socketio: {}
     processor: "./build/payloadProcessor.js"
@@ -11,6 +12,8 @@ config:
 scenarios:
     - name: "Emit xlsx data"
       engine: "socketio"
+      socketio:
+          transports: ["websocket"]
       flow:
           - loop:
                 - function: "generatePayload"
