@@ -2,6 +2,7 @@ import http from "http";
 import WebSocket from "ws";
 import cluster from "cluster";
 import os from "os";
+import { saveData } from "../helpers/saveToDb";
 
 const totalCPUs = os.cpus().length;
 
@@ -14,6 +15,9 @@ if (cluster.isPrimary) {
 
     cluster.on("exit", (worker, code, signal) => {
         console.log(`❌ Worker ${worker.process.pid} died`);
+        console.log("🟢 Starting a new worker");
+        console.log("Code: ", code);
+        console.log("Signal: ", signal);
         cluster.fork();
     });
 } else {
@@ -32,6 +36,7 @@ if (cluster.isPrimary) {
                 "\n📦 Raw message:\n",
                 JSON.stringify(JSON.parse(parsedMessage.payload), null, 4)
             );
+            saveData(parsedMessage);
             ws.send(message);
         });
 

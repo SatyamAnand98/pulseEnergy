@@ -35,7 +35,7 @@ function sendDataRepeatedly(
 function main(clientId: number) {
     const filePath = path.resolve(
         __dirname,
-        "../Files/meter_values_dump_10k.xlsx"
+        "../../Files/meter_values_dump_10k.xlsx"
     );
     const records = readExcelData(filePath);
     sendDataRepeatedly(clientId, records);
