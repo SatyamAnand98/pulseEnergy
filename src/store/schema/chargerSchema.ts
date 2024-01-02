@@ -8,12 +8,8 @@ const sampledValueSchema = new mongoose.Schema({
     phase: { type: String, required: false },
 });
 
-const meterValueSchema = new mongoose.Schema({
-    timestamp: { type: Date, required: true },
-    sampledValue: [sampledValueSchema],
-});
-
 export const chargerSchema = new mongoose.Schema({
     chargerId: { type: String, required: true, index: true },
-    meterValue: [meterValueSchema],
+    timestamp: { type: Date, required: true },
+    sampledValue: [sampledValueSchema],
 });

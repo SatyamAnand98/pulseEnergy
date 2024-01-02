@@ -36,6 +36,7 @@ setInterval(saveBatch, saveInterval);
 export function saveData(chargerId: string, data: any) {
     batchBuffer.push({
         chargerId: chargerId,
-        meterValue: data.meterValue,
+        timestamp: data.meterValue[0].timestamp,
+        sampledValue: data.meterValue[0].sampledValue,
     });
 }

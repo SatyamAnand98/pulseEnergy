@@ -41,7 +41,10 @@ if (cluster.isPrimary) {
                     parsedMessage = JSON.parse(message);
                 }
                 socket.emit("onResponse", parsedMessage);
-                saveData(parsedMessage.charge_point_id, parsedMessage.payload);
+                saveData(
+                    parsedMessage.charge_point_id,
+                    JSON.parse(parsedMessage.payload)
+                );
             } catch (error) {
                 console.error("⚠️ Error parsing message: ", error);
             }
