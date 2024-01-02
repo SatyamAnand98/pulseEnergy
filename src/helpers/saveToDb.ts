@@ -3,6 +3,7 @@ import { createChargerDBConnection } from "../store/DB";
 const batchBuffer: any = [];
 const saveInterval = 10000;
 const { success, chargerDBModels } = createChargerDBConnection();
+
 if (!success) {
     console.error("🔴 Error connecting to database");
     throw new Error("Error connecting to database");
@@ -16,14 +17,16 @@ function saveBatch() {
 
     console.log("Saving batch of size:", batchBuffer.length);
 
+    const tempBuffer = batchBuffer.splice(0, batchBuffer.length);
+
     chargerDBModels.chargerModel
-        .insertMany(batchBuffer)
+        .insertMany(tempBuffer)
         .then((docs: any) => {
             console.log("Batch saved:", docs.length);
-            batchBuffer.length = 0;
         })
         .catch((err: any) => {
             console.error("Error saving batch:", err);
+            Array.prototype.push.apply(batchBuffer, tempBuffer);
         });
 }
 
