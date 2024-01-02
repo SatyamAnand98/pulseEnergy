@@ -16,7 +16,7 @@ function saveBatch() {
 
     console.log("Saving batch of size:", batchBuffer.length);
 
-    const chargerDBInfo = chargerDBModels.chargerModel
+    chargerDBModels.chargerModel
         .insertMany(batchBuffer)
         .then((docs: any) => {
             console.log("Batch saved:", docs.length);
