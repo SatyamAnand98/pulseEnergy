@@ -1,18 +1,39 @@
 import { createChargerDBConnection } from "../store/DB";
 
-export function saveData(data: any) {
-    const { success, chargerDBModels } = createChargerDBConnection();
-    if (!success) {
-        console.log("🔴 Error connecting to database");
+const batchBuffer: any = [];
+const saveInterval = 10000;
+const { success, chargerDBModels } = createChargerDBConnection();
+if (!success) {
+    console.error("🔴 Error connecting to database");
+    throw new Error("Error connecting to database");
+}
+
+function saveBatch() {
+    if (batchBuffer.length === 0) {
+        console.log("No data to save");
         return;
     }
-    const newChargerData = new chargerDBModels.chargerModel({
-        chargerId: data.charge_point_id,
-        payload: JSON.parse(data.payload),
-    });
 
-    newChargerData
-        .save()
-        .then((doc: any) => console.log("Document saved:", doc))
-        .catch((err: any) => console.error("Error saving document:", err));
+    console.log("Saving batch of size:", batchBuffer.length);
+
+    const chargerDBInfo = chargerDBModels.chargerModel
+        .insertMany(batchBuffer)
+        .then((docs: any) => {
+            console.log("Batch saved:", docs.length);
+            batchBuffer.length = 0;
+        })
+        .catch((err: any) => {
+            console.error("Error saving batch:", err);
+        });
+}
+
+setInterval(saveBatch, saveInterval);
+
+export function saveData(chargerId: string, data: any) {
+    batchBuffer.push({
+        chargerId: chargerId,
+        connectorId: data.connectorId,
+        transactionId: data.transactionId,
+        meterValue: data.meterValue,
+    });
 }

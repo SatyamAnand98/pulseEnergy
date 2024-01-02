@@ -14,21 +14,25 @@ io.on("connection", (socket) => {
     console.log(`🟢 New connection ${socket.id}`);
 
     socket.on("message", (message) => {
-        console.log("Received message: ", message);
+        // console.log("Received message: ", message);
 
-        if (!message) {
-            console.log("⚠️ Received an empty message");
-        }
+        // if (!message) {
+        //     console.log("⚠️ Received an empty message");
+        // }
 
         try {
             if (typeof message === "object") {
-                console.log("✅ Parsed message: ", message);
+                // console.log("✅ Parsed message: ", message);
 
-                saveData(message);
+                saveData(message.charge_point_id, JSON.parse(message.payload));
 
                 socket.emit("onResponse", message);
             } else {
-                saveData(JSON.parse(message));
+                const parsedMessage = JSON.parse(message);
+                saveData(
+                    parsedMessage.charge_point_id,
+                    JSON.parse(parsedMessage.payload)
+                );
                 socket.emit("onResponse", JSON.parse(message));
             }
         } catch (error) {

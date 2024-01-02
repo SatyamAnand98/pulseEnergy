@@ -13,13 +13,9 @@ const meterValueSchema = new mongoose.Schema({
     sampledValue: [sampledValueSchema],
 });
 
-const payloadSchema = new mongoose.Schema({
+export const chargerSchema = new mongoose.Schema({
+    chargerId: { type: String, required: true, index: true },
     connectorId: { type: Number, required: true },
     transactionId: { type: Number, required: true },
     meterValue: [meterValueSchema],
-});
-
-export const chargerSchema = new mongoose.Schema({
-    chargerId: { type: String, required: true, index: true },
-    payload: { type: payloadSchema, required: true },
 });
