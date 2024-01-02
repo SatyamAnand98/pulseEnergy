@@ -38,7 +38,7 @@ class DBConnection {
                     dbName: "pulseEnergy",
                 }
             );
-            console.log("🟢 Connected to Notification DB!");
+            console.log("🟢 Connected to pulsechargers DB!");
             //@ts-ignore
             this.ChargerDBModels = chargerDBModels(this.chargerDatabase);
         } catch (error: any) {
