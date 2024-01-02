@@ -1,9 +1,9 @@
 config:
     target: "http://localhost:3000"
     phases:
-        - duration: 60
-          arrivalRate: 1
-          name: "Send all records"
+        - duration: 3600
+          arrivalRate: 14
+          name: "Load Test for 1 hour with over 50000 clients creating 14 clients per second"
     engines:
         socketio: {}
     processor: "./build/payloadProcessor.js"
@@ -17,5 +17,5 @@ scenarios:
                 - emit:
                       channel: "message"
                       data: "{{ payload }}"
-                - think: 1
-            count: 10000
+                - think: 5
+            count: 720

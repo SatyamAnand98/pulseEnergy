@@ -2,6 +2,7 @@ import http from "http";
 import { Server as SocketIOServer } from "socket.io";
 import { saveData } from "../helpers/saveToDb";
 
+let count_of_clients = 0;
 const httpServer = http.createServer();
 const io = new SocketIOServer(httpServer, {
     cors: {
@@ -11,37 +12,30 @@ const io = new SocketIOServer(httpServer, {
 });
 
 io.on("connection", (socket) => {
-    console.log(`🟢 New connection ${socket.id}`);
+    count_of_clients++;
+    console.log(
+        `🟢 New connection ${socket.id}, count of clients are: ${count_of_clients}`
+    );
 
     socket.on("message", (message) => {
-        // console.log("Received message: ", message);
-
-        // if (!message) {
-        //     console.log("⚠️ Received an empty message");
-        // }
+        let parsedMessage = message;
 
         try {
-            if (typeof message === "object") {
-                // console.log("✅ Parsed message: ", message);
-
-                saveData(message.charge_point_id, JSON.parse(message.payload));
-
-                socket.emit("onResponse", message);
-            } else {
-                const parsedMessage = JSON.parse(message);
-                saveData(
-                    parsedMessage.charge_point_id,
-                    JSON.parse(parsedMessage.payload)
-                );
-                socket.emit("onResponse", JSON.parse(message));
+            if (typeof message !== "object") {
+                parsedMessage = JSON.parse(message);
             }
+            socket.emit("onResponse", parsedMessage);
+            saveData(parsedMessage.charge_point_id, parsedMessage.payload);
         } catch (error) {
             console.error("⚠️ Error parsing message: ", error);
         }
     });
 
     socket.on("disconnect", () => {
-        console.log(`🔴 Connection with ${socket.id} closed`);
+        count_of_clients--;
+        console.log(
+            `🔴 Connection with ${socket.id} closed, remaining count of clients: ${count_of_clients}`
+        );
     });
 });
 

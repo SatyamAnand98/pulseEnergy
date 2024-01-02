@@ -1,7 +1,8 @@
 import { createChargerDBConnection } from "../store/DB";
 
 const batchBuffer: any = [];
-const saveInterval = 10000;
+const SAMPLING_FREQUENCY = 1; // in minute
+const saveInterval = 1000 * 60 * SAMPLING_FREQUENCY;
 const { success, chargerDBModels } = createChargerDBConnection();
 
 if (!success) {
@@ -35,8 +36,6 @@ setInterval(saveBatch, saveInterval);
 export function saveData(chargerId: string, data: any) {
     batchBuffer.push({
         chargerId: chargerId,
-        connectorId: data.connectorId,
-        transactionId: data.transactionId,
         meterValue: data.meterValue,
     });
 }
