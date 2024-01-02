@@ -1,6 +1,6 @@
 import http from "http";
 import { Server as SocketIOServer } from "socket.io";
-// import { saveData } from '../helpers/saveToDb';
+import { saveData } from "../helpers/saveToDb";
 
 const httpServer = http.createServer();
 const io = new SocketIOServer(httpServer, {
@@ -22,12 +22,14 @@ io.on("connection", (socket) => {
 
         try {
             if (typeof message === "object") {
-                const parsedMessage = JSON.parse(message);
-                console.log("✅ Parsed message: ", parsedMessage);
+                console.log("✅ Parsed message: ", message);
 
-                // saveData(parsedMessage);
+                saveData(message);
 
                 socket.emit("onResponse", message);
+            } else {
+                saveData(JSON.parse(message));
+                socket.emit("onResponse", JSON.parse(message));
             }
         } catch (error) {
             console.error("⚠️ Error parsing message: ", error);

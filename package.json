@@ -10,7 +10,7 @@
     "dev-server": "ts-node-dev --respawn --pretty --transpile-only src/server/webSocket.ts",
     "dev-client": "ts-node-dev --respawn --pretty --transpile-only src/client/client.ts",
     "dev-sendData": "ts-node-dev --respawn --pretty --transpile-only src/client/sendExcelData.ts",
-    "dev-artillery": "npm run build && artillery run artillery_config.yml",
+    "dev-artillery": "DEBUG=socketio artillery run artillery_config.yaml",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Satyam Anand",

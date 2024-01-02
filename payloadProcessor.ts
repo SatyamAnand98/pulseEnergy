@@ -18,8 +18,17 @@ readExcelData();
 
 module.exports = {
     generatePayload: (context: any, events: any, done: () => any) => {
-        const randomIndex = Math.floor(Math.random() * records.length);
-        context.vars.payload = records[randomIndex].payload;
+        if (context.vars.index === undefined) {
+            context.vars.index = 0;
+        }
+
+        if (context.vars.index < records.length) {
+            context.vars.payload = records[context.vars.index];
+            context.vars.index++;
+        } else {
+            context.vars.index = 0;
+        }
+
         return done();
     },
 };

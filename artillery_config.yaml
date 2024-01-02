@@ -3,8 +3,7 @@ config:
     phases:
         - duration: 60
           arrivalRate: 1
-          rampTo: 3
-          name: "Ramping up the load"
+          name: "Send all records"
     engines:
         socketio: {}
     processor: "./build/payloadProcessor.js"
@@ -14,10 +13,9 @@ scenarios:
       engine: "socketio"
       flow:
           - loop:
+                - function: "generatePayload"
                 - emit:
                       channel: "message"
-                      data: "Hello from Artillery!"
-                  response:
-                      on: "onResponse"
-                - think: 5
-            count: 3
+                      data: "{{ payload }}"
+                - think: 1
+            count: 10000
