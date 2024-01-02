@@ -24,7 +24,7 @@ module.exports = {
 
         if (context.vars.index < records.length) {
             context.vars.payload = records[context.vars.index];
-            context.vars.index++;
+            context.vars.index = (context.vars.index + 1) % records.length;
         } else {
             context.vars.index = 0;
         }
