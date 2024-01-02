@@ -1,38 +1,47 @@
 import WebSocket from "ws";
 
-let ws: WebSocket;
 const serverUrl = "ws://localhost:8080";
+const wsClients: Map<number, WebSocket> = new Map();
 
-function connectWebSocket() {
-    ws = new WebSocket(serverUrl);
+export const sendToServer = (clientId: number, message: string) => {
+    if (!wsClients.has(clientId)) {
+        const wsClient = new WebSocket(serverUrl);
 
-    ws.on("open", () => {
-        console.log("🟢 Connected to server");
-    });
+        wsClient.on("open", () => {
+            console.log(`🟢 Client ${clientId} connected to server`);
+            wsClient.send(message);
+        });
 
-    ws.on("close", () => {
-        console.log("🔴 Disconnected from server. Reconnecting...");
-        setTimeout(connectWebSocket, 5000);
-    });
+        wsClient.on("message", (message: string) => {
+            const parsedMessage = JSON.parse(message);
+            console.log(
+                "✅ Received message from server with clientId: ",
+                clientId,
+                "\n",
+                "🔌 Charge point ID: ",
+                parsedMessage.charge_point_id,
+                "\n📦 Raw message:\n",
+                JSON.stringify(JSON.parse(parsedMessage.payload), null, 4)
+            );
+        });
 
-    ws.on("message", (message: string) => {
-        const parsedMessage = JSON.parse(message);
-        console.log(
-            "✅ Received message from server:\n",
-            "🔌 Charge point ID: ",
-            parsedMessage.charge_point_id,
-            "\n📦 Raw message:\n",
-            JSON.stringify(JSON.parse(parsedMessage.payload), null, 4)
-        );
-    });
-}
+        wsClient.on("close", () => {
+            console.log(`🔴 Client ${clientId} disconnected from server`);
+        });
 
-export const sendToServer = (message: string) => {
-    if (ws.readyState === WebSocket.OPEN) {
-        ws.send(message);
+        wsClient.on("error", (err) => {
+            console.error(`WebSocket error for client ${clientId}:`, err);
+        });
+
+        wsClients.set(clientId, wsClient);
     } else {
-        console.log("❌ WebSocket is not open. Message not sent.");
+        const wsClient = wsClients.get(clientId);
+        if (wsClient && wsClient.readyState === WebSocket.OPEN) {
+            wsClient.send(message);
+        } else {
+            console.log(
+                `❌ WebSocket for client ${clientId} is not open. Message not sent.`
+            );
+        }
     }
 };
-
-connectWebSocket();

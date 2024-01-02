@@ -1,7 +1,9 @@
 import * as xlsx from "xlsx";
 import * as path from "path";
 import { sendToServer } from "./client";
+import dotenv from "dotenv";
 
+dotenv.config();
 interface MeterRecord {
     charge_point_id: string;
     payload: string;
@@ -14,30 +16,32 @@ function readExcelData(filePath: string): MeterRecord[] {
     return xlsx.utils.sheet_to_json<MeterRecord>(worksheet);
 }
 
-function sendDataRepeatedly(records: MeterRecord[], index: number = 0) {
+function sendDataRepeatedly(
+    clientId: number,
+    records: MeterRecord[],
+    index: number = 0
+) {
     if (index >= records.length) {
         index = 0;
     }
 
-    sendToServer(JSON.stringify(records[index]));
-    setTimeout(() => sendDataRepeatedly(records, index + 1), 5000);
+    sendToServer(clientId, JSON.stringify(records[index]));
+    setTimeout(
+        () => sendDataRepeatedly(clientId, records, index + 1),
+        5000 / (clientId + 1)
+    );
 }
 
-function main() {
+function main(clientId: number) {
     const filePath = path.resolve(
         __dirname,
         "../Files/meter_values_dump_10k.xlsx"
     );
     const records = readExcelData(filePath);
-    sendDataRepeatedly(records);
+    sendDataRepeatedly(clientId, records);
 }
 
-const numberOfClients = 50000;
+const numberOfClients = Number(process.env.CLIENT_COUNT);
 for (let i = 0; i < numberOfClients; i++) {
-    main();
+    main(i);
 }
-
-setTimeout(() => {
-    console.log("✅ Simulation complete.");
-    process.exit(0);
-}, 3600000);
