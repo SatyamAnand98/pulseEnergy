@@ -7,6 +7,6 @@
         "strict": true,
         "esModuleInterop": true
     },
-    "include": ["**/*.ts", "payloadProcessor.js"],
+    "include": ["**/*.ts", "payloadProcessor.ts"],
     "exclude": ["node_modules"]
 }

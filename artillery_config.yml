@@ -1,22 +1,23 @@
 config:
     target: "http://localhost:3000"
-    # phases:
-    #     - duration: 3600
-    #       arrivalRate: 1
-    #       rampTo: 51000
-    #       name: "Ramping up the load"
-    socketio:
-        transports: ["websocket"]
+    phases:
+        - duration: 60
+          arrivalRate: 1
+          rampTo: 3
+          name: "Ramping up the load"
     engines:
         socketio: {}
-    processor: "./payloadProcessor.js"
+    processor: "./build/payloadProcessor.js"
 
 scenarios:
-    - name: "SocketIO"
+    - name: "Emit xlsx data"
       engine: "socketio"
       flow:
-          # - loop:
-          - emit:
-                data: "HELLO WORLD"
-          - think: 5
-          # count: 720
+          - loop:
+                - emit:
+                      channel: "message"
+                      data: "Hello from Artillery!"
+                  response:
+                      on: "onResponse"
+                - think: 5
+            count: 3

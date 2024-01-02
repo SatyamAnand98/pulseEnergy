@@ -1,7 +1,7 @@
-const xlsx = require("xlsx");
-const path = require("path");
+import xlsx from "xlsx";
+import path from "path";
 
-let records = [];
+let records: any = [];
 
 function readExcelData() {
     const filePath = path.resolve(
@@ -17,12 +17,9 @@ function readExcelData() {
 readExcelData();
 
 module.exports = {
-    generatePayload: (context, events, done) => {
+    generatePayload: (context: any, events: any, done: () => any) => {
         const randomIndex = Math.floor(Math.random() * records.length);
-        const payload = records[randomIndex].payload;
-        console.log("Generated payload:", payload);
-
-        context.vars.payload = payload;
+        context.vars.payload = records[randomIndex].payload;
         return done();
     },
 };
