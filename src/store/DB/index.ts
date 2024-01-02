@@ -4,7 +4,7 @@
  * Proprietary and confidential
  *
  * @author Satyam Anand
- * @description Silisoul Auth db Connection - entry point
+ * @description Static class to create single DB connection and return DB models
  *
  */
 
