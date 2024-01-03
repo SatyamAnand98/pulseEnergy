@@ -1,4 +1,4 @@
-import Joi from "Joi";
+import Joi from "joi";
 
 export const chargerControllerValidator = Joi.object({
     charge_point_id: Joi.string().required(),

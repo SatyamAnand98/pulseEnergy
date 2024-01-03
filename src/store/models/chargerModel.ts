@@ -1,4 +1,4 @@
-import type mongoose from "mongoose";
+import mongoose from "mongoose";
 import { chargerSchema } from "../schema/chargerSchema";
 
 export const chargerDBModels = (chargerDatabase: mongoose.Connection) => {

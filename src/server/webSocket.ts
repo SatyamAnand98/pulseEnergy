@@ -62,3 +62,6 @@ if (cluster.isPrimary) {
         console.log(`🟢 Worker ${process.pid} started on port 3000`);
     });
 }
+
+// docker build --platform amd64 -t 28mar1998/websocket-server:latest .
+// docker push 28mar1998/websocket-server:latest
