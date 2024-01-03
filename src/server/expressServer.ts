@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import chargerRouter from "../routes";
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
 app.use(bodyParser.json());
 app.use("/chargers", chargerRouter);

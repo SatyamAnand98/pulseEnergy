@@ -1,42 +1,58 @@
 import { createChargerDBConnection } from "../store/DB";
+import { EBatchProcessingMode } from "../store/enum/batchprocessing.switch";
+import { IChargerData } from "../store/interfaces/chargerController.interface";
 
-const batchBuffer: any = [];
-const SAMPLING_FREQUENCY = 1; // in minute
-const saveInterval = 1000 * 60 * SAMPLING_FREQUENCY;
-const { success, chargerDBModels } = createChargerDBConnection();
+export class BatchProcessor {
+    private buffer: IChargerData[] = [];
+    private saveInterval: number;
+    private batchSize: number = 1000;
+    private samplingFrequency: number = 1;
+    private processingMode: EBatchProcessingMode =
+        EBatchProcessingMode.FrequencyBased;
+    private chargerDBModel: any;
 
-if (!success) {
-    console.error("🔴 Error connecting to database");
-    throw new Error("Error connecting to database");
-}
-
-function saveBatch() {
-    if (batchBuffer.length === 0) {
-        console.log("No data to save");
-        return;
+    constructor() {
+        const { success, chargerDBModels } = createChargerDBConnection();
+        if (!success) {
+            throw new Error("Error connecting to database");
+        }
+        this.chargerDBModel = chargerDBModels.chargerModel;
+        this.saveInterval = 1000 * 60 * this.samplingFrequency;
+        if (this.processingMode === EBatchProcessingMode.FrequencyBased) {
+            setInterval(() => this.saveBatch(), this.saveInterval);
+        }
     }
 
-    console.log("Saving batch of size:", batchBuffer.length);
-
-    const tempBuffer = batchBuffer.splice(0, batchBuffer.length);
-
-    chargerDBModels.chargerModel
-        .insertMany(tempBuffer)
-        .then((docs: any) => {
-            console.log("Batch saved:", docs.length);
-        })
-        .catch((err: any) => {
-            console.error("Error saving batch:", err);
-            Array.prototype.push.apply(batchBuffer, tempBuffer);
+    saveData(chargerId: string, data: any) {
+        this.buffer.push({
+            chargerId: chargerId,
+            timestamp: data.meterValue[0].timestamp,
+            sampledValue: data.meterValue[0].sampledValue,
         });
-}
+        if (
+            this.processingMode === EBatchProcessingMode.SizeBased &&
+            this.buffer.length >= this.batchSize
+        ) {
+            this.saveBatch();
+        }
+    }
 
-setInterval(saveBatch, saveInterval);
+    private async saveBatch() {
+        if (this.buffer.length === 0) {
+            console.log("No data to save");
+            return;
+        }
+        const tempBuffer = [...this.buffer];
+        console.log("Saving batch of size:", this.buffer.length);
 
-export function saveData(chargerId: string, data: any) {
-    batchBuffer.push({
-        chargerId: chargerId,
-        timestamp: data.meterValue[0].timestamp,
-        sampledValue: data.meterValue[0].sampledValue,
-    });
+        this.buffer = [];
+
+        try {
+            const docs = await this.chargerDBModel.insertMany(tempBuffer);
+            console.log("Batch saved:", docs.length);
+        } catch (err) {
+            console.error("Error saving batch:", err);
+            this.buffer.push(...tempBuffer);
+        }
+    }
 }

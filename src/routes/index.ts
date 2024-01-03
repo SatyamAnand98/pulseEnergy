@@ -3,8 +3,8 @@ import { ChargerController } from "../controllers";
 
 const chargerRouter = express.Router();
 
-chargerRouter.get("/", ChargerController.getChargerData);
+chargerRouter.get("/all", ChargerController.getChargerData);
 
-chargerRouter.get("/:id", ChargerController.getChargerDataById);
+chargerRouter.get("/record", ChargerController.getChargerDataById);
 
 export default chargerRouter;

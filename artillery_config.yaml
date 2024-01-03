@@ -1,5 +1,5 @@
 config:
-    target: "ws://127.0.0.1:53550"
+    target: "ws://localhost:3000"
     phases:
         - duration: 3600
           arrivalRate: 14

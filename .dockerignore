@@ -1,3 +1,7 @@
 build
 node_modules
 .DS_Store
+kubernetes/
+.env.example
+.env
+.README.md

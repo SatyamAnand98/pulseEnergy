@@ -1,8 +1,14 @@
 import { Request, Response } from "express";
-import { chargerDataValidator } from "../store/validators/chargerController.validator";
+import {
+    chargerDataValidator,
+    chargerValueRecordValidator,
+} from "../store/validators/chargerController.validator";
 import { ChargerHelper } from "../helpers";
 import { EHTTPS_RESPONSE_CODE } from "../store/HTTP_Response_Code/responseCode.enum";
-import { IGetChargerData } from "../store/interfaces/chargerController.interface";
+import {
+    IGetChargerData,
+    ISingleSampledValue,
+} from "../store/interfaces/chargerController.interface";
 
 export class ChargerController {
     static async getChargerData(req: Request, res: Response) {
@@ -22,9 +28,9 @@ export class ChargerController {
 
     static async getChargerDataById(req: Request, res: Response) {
         try {
-            const { id } = req.params;
-
-            const response = await ChargerHelper.getChargerDataByIdHelper(id);
+            const data: ISingleSampledValue =
+                await chargerValueRecordValidator.validateAsync(req.query);
+            const response = await ChargerHelper.getChargerDataByIdHelper(data);
 
             res.status(EHTTPS_RESPONSE_CODE.OK).json(response);
         } catch (err: any) {

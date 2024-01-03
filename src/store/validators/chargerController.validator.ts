@@ -25,5 +25,14 @@ export const chargerControllerValidator = Joi.object({
 export const chargerDataValidator = Joi.object({
     page: Joi.number().integer().min(1).default(1).strict(false),
     limit: Joi.number().integer().min(1).default(10).strict(false),
-    chargerPointId: Joi.string().allow("", null).optional(),
+    chargerPointIds: Joi.array().items(Joi.string()).allow("", null).optional(),
+});
+
+export const chargerValueRecordValidator = Joi.object({
+    value: Joi.string().optional().allow("", null),
+    context: Joi.string().optional().allow("", null),
+    measurand: Joi.string().optional().allow("", null),
+    unit: Joi.string().optional().allow("", null),
+    page: Joi.number().integer().min(1).optional().strict(false),
+    limit: Joi.number().integer().min(1).optional().strict(false),
 });

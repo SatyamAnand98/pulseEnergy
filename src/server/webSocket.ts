@@ -2,24 +2,38 @@ import http from "http";
 import { Server as SocketIOServer } from "socket.io";
 import cluster from "cluster";
 import os from "os";
-import { saveData } from "../helpers/saveToDb";
+import pino from "pino";
+import { KafkaProducerSingleton } from "../store/kafka/producer";
+import { BatchProcessor } from "../helpers/saveToDb";
+import dotenv from "dotenv";
+dotenv.config();
 
-if (cluster.isPrimary) {
-    console.log(`🟢 Master ${process.pid} is running`);
+const logger = pino({
+    level: process.env.LOG_LEVEL,
+});
+
+const PORT = process.env.PORT || 3000;
+const TOPIC = process.env.KAFKA_TOPIC;
+const ENABLE_KAFKA: boolean = process.env.ENABLE_KAFKA === "true" || false;
+const BATCH_PROCESSOR = new BatchProcessor();
+const UTILIZE_CPU_CORES: boolean =
+    process.env.UTILIZE_CPU_CORES === "true" || false;
+
+if (cluster.isPrimary && UTILIZE_CPU_CORES) {
+    logger.info(`🟢 Master ${process.pid} is running`);
 
     const numCPUs = os.cpus().length;
-    console.log(`🟢 Forking ${numCPUs} CPUs`);
+    logger.info(`🟢 Forking ${numCPUs} CPUs`);
     for (let i = 0; i < numCPUs; i++) {
         cluster.fork();
     }
 
     cluster.on("exit", (worker, code, signal) => {
-        console.log(`🔴 Worker ${worker.process.pid} died`);
-        console.log("🟢 Starting a new worker");
+        logger.error(`🔴 Worker ${worker.process.pid} died`);
+        logger.info("🟢 Starting a new worker");
         cluster.fork();
     });
 } else {
-    let count_of_clients = 0;
     const httpServer = http.createServer();
     const io = new SocketIOServer(httpServer, {
         cors: {
@@ -27,41 +41,64 @@ if (cluster.isPrimary) {
             methods: ["GET", "POST"],
         },
     });
-
     io.on("connection", (socket) => {
-        count_of_clients++;
-        console.log(
-            `🟢 New connection ${socket.id}, count of clients: ${count_of_clients}`
-        );
+        logger.info(`New connection ${socket.id}`);
 
-        socket.on("message", (message) => {
-            let parsedMessage = message;
+        socket.on("message", async (message) => {
             try {
-                if (typeof message !== "object") {
-                    parsedMessage = JSON.parse(message);
-                }
+                const parsedMessage =
+                    typeof message === "object" ? message : JSON.parse(message);
                 socket.emit("onResponse", parsedMessage);
-                saveData(
-                    parsedMessage.charge_point_id,
-                    JSON.parse(parsedMessage.payload)
-                );
+
+                if (ENABLE_KAFKA) {
+                    KafkaProducerSingleton.sendToKafka(
+                        JSON.stringify({
+                            chargerId: parsedMessage.charge_point_id,
+                            payload: JSON.parse(parsedMessage.payload),
+                        }),
+                        TOPIC
+                    )
+                        .then(() =>
+                            logger.info("Message sent to kafka successfully")
+                        )
+                        .catch((e) =>
+                            logger.error("Error sending message to kafka: ", e)
+                        );
+                } else {
+                    BATCH_PROCESSOR.saveData(
+                        parsedMessage.charge_point_id,
+                        JSON.parse(parsedMessage.payload)
+                    );
+                }
             } catch (error) {
-                console.error("⚠️ Error parsing message: ", error);
+                logger.error(`Error with message from ${socket.id}: `, error);
             }
         });
 
         socket.on("disconnect", () => {
-            count_of_clients--;
-            console.log(
-                `🔴 Connection with ${socket.id} closed, remaining count of clients: ${count_of_clients}`
-            );
+            logger.info(`Connection with ${socket.id} closed`);
         });
     });
 
-    httpServer.listen(3000, () => {
-        console.log(`🟢 Worker ${process.pid} started on port 3000`);
+    httpServer.listen(PORT, () => {
+        logger.info(`Server started on port ${PORT}`);
     });
-}
 
-// docker build --platform amd64 -t 28mar1998/websocket-server:latest .
-// docker push 28mar1998/websocket-server:latest
+    const gracefulShutdown = () => {
+        logger.info("Shutting down gracefully...");
+        io.close(() => {
+            logger.info("Closed out remaining connections.");
+            process.exit(0);
+        });
+
+        setTimeout(() => {
+            logger.error(
+                "Could not close connections in time, forcefully shutting down"
+            );
+            process.exit(1);
+        }, 10000);
+    };
+
+    process.on("SIGTERM", gracefulShutdown);
+    process.on("SIGINT", gracefulShutdown);
+}

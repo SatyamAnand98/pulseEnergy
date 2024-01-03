@@ -1,13 +1,3 @@
-/**
- * Copyright (C) 2019 - All Rights Reserved
- * Unauthorized copying of this file, via any medium is strictly prohibited
- * Proprietary and confidential
- *
- * @author Satyam Anand
- * @description Static class to create single DB connection and return DB models
- *
- */
-
 import * as dotenv from "dotenv";
 import mongoose from "mongoose";
 import { chargerDBModels } from "../models/chargerModel";
@@ -16,10 +6,12 @@ dotenv.config();
 
 class DBConnection {
     private static instance: DBConnection;
-    private chargerDatabase: mongoose.Connection | undefined;
+    private chargerDatabase: mongoose.Connection;
     private ChargerDBModels: any;
 
-    private constructor() {}
+    private constructor() {
+        this.setupCloseHandlers();
+    }
 
     public static getInstance() {
         if (!this.instance) {
@@ -38,11 +30,47 @@ class DBConnection {
                     dbName: "pulseEnergy",
                 }
             );
-            console.log("🟢 Connected to pulsechargers DB!");
+
+            this.chargerDatabase.on("connected", () => {
+                console.log("🟢 Connected to pulsechargers DB!");
+            });
+
+            this.chargerDatabase.on("error", (error) => {
+                console.error("🔴 Database connection error:", error);
+            });
+
             //@ts-ignore
             this.ChargerDBModels = chargerDBModels(this.chargerDatabase);
         } catch (error: any) {
-            console.log("🔴 MONGODB_CLIENT closed: ", error.message);
+            console.error(
+                "🔴 Error initializing database connection:",
+                error.message
+            );
+            this.closeConnection();
+        }
+    }
+
+    private setupCloseHandlers() {
+        process.on("SIGINT", this.closeConnection.bind(this));
+        process.on("SIGTERM", this.closeConnection.bind(this));
+        process.on("uncaughtException", (error) => {
+            console.error("🔴 Uncaught Exception:", error);
+            this.closeConnection();
+        });
+    }
+
+    private closeConnection() {
+        if (this.chargerDatabase) {
+            this.chargerDatabase
+                .close()
+                .then(() => {
+                    console.log("🟠 Database connection closed!");
+                    process.exit(0);
+                })
+                .catch((error) => {
+                    console.error("Error closing database connection:", error);
+                    process.exit(1);
+                });
         }
     }
 
