@@ -15,5 +15,10 @@ spec:
             containers:
                 - name: websocket
                   image: 28mar1998/websocket-server:latest
+                  resources:
+                      requests:
+                          memory: "1024Mi"
+                      limits:
+                          memory: "2024Mi"
                   ports:
                       - containerPort: 3000
