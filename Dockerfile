@@ -6,7 +6,7 @@ WORKDIR /var/www/app/pulse-energy
 COPY package.json /var/www/app/pulse-energy
 COPY tsconfig.json /var/www/app/pulse-energy
 
-ENV NODE_ENV="production" CLIENT_COUNT=3 DB_URI="mongodb+srv://admin:admin@pulseenergy.2q01dxj.mongodb.net/" UTILIZE_CPU_CORES=false ENABLE_KAFKA=false KAFKA_TOPIC="my-topic" LOG_LEVEL="info" PORT=300
+ENV NODE_ENV="production" CLIENT_COUNT=3 DB_URI="mongodb+srv://admin:admin@pulseenergy.2q01dxj.mongodb.net/" UTILIZE_CPU_CORES=false ENABLE_KAFKA=false KAFKA_TOPIC="my-topic" LOG_LEVEL="info" PORT=3000
 RUN npm install
 
 COPY . /var/www/app/pulse-energy
