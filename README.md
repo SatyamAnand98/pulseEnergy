@@ -139,7 +139,7 @@ npm run loadTesting
 ## Screenshots
 
 <p align="center">
-  <img src="https://github.com/SatyamAnand98/pulseEnergy/blob/main/Files/screenshot.png" width="350" title="Screenshot of both websocket server(running on kubernetes) and client(running locally)">
-  <img src="[your_relative_path_here_number_2_large_name](https://github.com/SatyamAnand98/pulseEnergy/blob/main/Files/screenshot2.png)" width="350" alt="Screenshot of websocket server(running on kubernetes)">
+  <img src="https://github.com/SatyamAnand98/pulseEnergy/blob/496193b28c94f5c40e7e76f9c1cf0196c7fed97e/Files/screenshots.png" width="350" title="Screenshot of both websocket server(running on kubernetes) and client(running locally)">
+  <img src="https://github.com/SatyamAnand98/pulseEnergy/blob/496193b28c94f5c40e7e76f9c1cf0196c7fed97e/Files/screenshot2.png" width="350" alt="Screenshot of websocket server(running on kubernetes)">
 </p>
 
