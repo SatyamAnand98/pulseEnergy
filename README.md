@@ -43,7 +43,7 @@ This project is designed to showcase a WebSocket server capable of handling data
 -   **ingress**
 -   **kafka**
 -   **zookeeper**
--   **WebSocket** (using the `ws` library)
+-   **WebSocket** (using the `socket.io` library)
 -   **Excel File Handling** (using the `xlsx` library)
 
 > [!NOTE]
