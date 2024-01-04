@@ -4,15 +4,35 @@
 
 This project is designed to showcase a WebSocket server capable of handling data streaming from over 50,000 clients simultaneously. It simulates a scenario where clients continuously send meter reading data to the server.
 
+> [!TIP]
+> **In theory, a server can handle up to 65,536 sockets per single IP address**
+
 ## Features
 
--   Scalable WebSocket server for handling multiple client connections using.
-    -  multiple cores of processor/ CPU
-    -  Horizontal Pod Autoscaler (HPA) in kubernetes
+- [x] Scalable WebSocket server for handling multiple client connections using.
+    -  [x] multiple cores of processor/ CPU
+    -  [x] Horizontal Pod Autoscaler (HPA) in kubernetes
+    -  [x] Including pub/sub to handle unpredictable scalability
       
--   Client scripts to simulate data streaming from numerous sources and mock clients can be tested using artillery.io.
--   Data parsing and handling from Excel files.
--   Development environment setup for real-time TypeScript compilation (For the bonus point 😉)
+-   [x] Client scripts to simulate data streaming from numerous sources and mock clients can be tested using artillery.io.
+-   [x] Saving load on machine by batch processing of data with a flexibility of batch processing by size of buffer or sampling frequency
+-   [x] handling the race condition of batch processing.
+-   [x] Data parsing and handling from Excel files.
+-   [x] Development environment setup for real-time TypeScript compilation (For the bonus point 😉)
+-   [x] For API endpoint, to fetch data at better pace, created a balance of indexing data while storing.
+-   [x] used OLAP method to store and fetch data from DB.
+
+## Improvements (did not include in current submission as the clients connection and load shed was handled by artillery)
+
+-    [ ] Load Shedding of rejected/ idle websocket connections on server and client ends
+-    [ ] Restoring connections by storing the connection config into zookeeper.
+-    [ ] Increasing the waiting time between retries to maximum backoff time.
+-    [ ] Making backoff time random, so that not all clients reconnect simultaneously.
+-    [ ] Manage stream resumes after reconnection of clients by maintaining cache/ persistant storage.
+-    [ ] Managing frequency of heartbeats, to keep track of idle connection, so that longer idle clients create a new connection when needed rather than keeping the connection alive.
+
+-    [ ] Use of master and slave database, to ensure faster accessibility of data from analytical database that offers only read only operation.
+-    [ ] Use of multiple slave databases to ensure load balancing on database. Bulk write into slave database and eventually, written to master database.
 
 ## Technology Stack
 
@@ -26,7 +46,7 @@ This project is designed to showcase a WebSocket server capable of handling data
 -   **WebSocket** (using the `ws` library)
 -   **Excel File Handling** (using the `xlsx` library)
 
-> [!TIP]
+> [!NOTE]
 > **FOR DEPLOYING ON KUBERNETES USING MINIKUBE, an article is coming soon..**
 
 ## Project Structure
@@ -126,9 +146,9 @@ npm run dev
 npm run loadTesting
 ```
 
-## Testing
+## API Docs
 
-> [!TIP]
+> [!IMPORTANT]
 > To view API documentation for the required enpoints [click here](https://documenter.getpostman.com/view/20345587/2s9YsFFEUo)
 > 
 
